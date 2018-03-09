@@ -12,7 +12,7 @@ banner: "img/banners/4.jpg"
 
 You want to do convert data from a wide format to a long format.
 
-Many functions in R expect data to be in a long format rather than a wide format. Programs like SPSS, however, often use wide-formatted data.
+Many functions in R expect data to be in <!--more--> a long format rather than a wide format. Programs like SPSS, however, often use wide-formatted data.
 
 
 
