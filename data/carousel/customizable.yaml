@@ -1,0 +1,9 @@
+weight: 4
+title: "Programing"
+description: >
+  <ul class="list-style-none">
+    <li>In theory, </li>
+    <li> theory and practice are the same.</li>
+    <li> In practice, they’re not.</li>
+  </ul>
+image: "img/carousel/template-easy-code.png"

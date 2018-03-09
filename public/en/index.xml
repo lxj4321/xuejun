@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Xuejun&#39;s Blog on Xuejun Liu | 刘学军</title>
+    <link>/en/</link>
+    <description>Recent content in Xuejun&#39;s Blog on Xuejun Liu | 刘学军</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Feb 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/en/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Notes：Converting data between wide and long format</title>
+      <link>/en/notes-converting-data-between-wide-and-long-format/</link>
+      <pubDate>Sun, 25 Feb 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/en/notes-converting-data-between-wide-and-long-format/</guid>
+      <description>1.Problem You want to do convert data from a wide format to a long format. Many functions in R expect data to be in a long format rather than a wide format. Programs like SPSS, however, often use wide-formatted data. 2.Solution There are two sets of methods that are explained below: gather() and spread() from the tidyr package. This is a newer interface to the reshape2 package. melt() and dcast()</description>
+    </item>
+    
+  </channel>
+</rss>

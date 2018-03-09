@@ -1,0 +1,457 @@
+---
+title: EXCEL函数vlookup R语言实现方法
+author: 刘学军
+date: '2018-02-18'
+slug: excel函数vlookupr语言实现方法
+categories: ["编程"]
+tags: ["R语言","EXCEL","vlookup"]
+keyword: R语言
+banner: "img/banners/9.jpg"
+---
+
+
+
+<p>vlookup是EXCEL中应用比较多的函数，可以连接两表数据，但在应用中存在明显缺陷：<br />
+1.在处理一对多数据时只能返回第一个值，在数据多时难以一一查找。<br />
+2.数据较大时处理速度较慢。<br />
+3.查找值必须在数据表第一列。<br />
+R语言在连接两表时更加灵活、快捷。下面用R包tidyverse来实现vlookup功能：</p>
+<p>首先加载tidyverse包。</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<div class="section level2">
+<h2>1 存在一一对应关系的两张表</h2>
+<div class="section level3">
+<h3>1.1 连接<strong>变量名</strong>一致</h3>
+<p>数据表准备：数据可以用readxl包<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>从EXCEL表中导入，也可以在R中直接输入,代码如下：</p>
+<pre class="r"><code>&quot;雇员1&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01025&quot;),
+  &quot;姓名&quot;=c(&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;,&quot;赵六&quot;))
+
+&quot;人员信息1&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01025&quot;),
+  &quot;工资&quot;=c(4500,5200,7000,7800),
+  &quot;部门&quot;=c(&quot;管理部&quot;,&quot;技术部&quot;,&quot;财务部&quot;,&quot;财务部&quot;))</code></pre>
+<p>数据表见表<a href="#tab:table-1">1</a>,表<a href="#tab:table-2">2</a></p>
+<table>
+<caption><span id="tab:table-1">Table 1: </span>数据表1</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+</tr>
+<tr class="even">
+<td align="left">01025</td>
+<td align="left">赵六</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption><span id="tab:table-2">Table 2: </span>数据表2</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="even">
+<td align="left">01025</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+</tr>
+</tbody>
+</table>
+<p><strong>连接两表：</strong>通过函数<code>left_join(x, y, by = NULL, copy = FALSE, suffix = c(&quot;.x&quot;, &quot;.y&quot;), ...)</code>连接两表，参数x为表一，y为表二，by为连接变量，见合并表<a href="#tab:table-3">3</a>。</p>
+<pre class="r"><code>&quot;合并表1&quot; &lt;- left_join(雇员1,人员信息1)</code></pre>
+<table>
+<caption><span id="tab:table-3">Table 3: </span>合并表-1</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="even">
+<td align="left">01025</td>
+<td align="left">赵六</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+</tr>
+</tbody>
+</table>
+<p>也可以指定by参数：<code>left_join(雇员1,人员信息1,by=  &quot;编码&quot;)</code></p>
+</div>
+<div class="section level3">
+<h3>1.2 连接变量名不一致</h3>
+<p>当连接变量名不一致时，可指定连接参数，如下表连接变量为编码—号码：</p>
+<pre class="r"><code>&quot;雇员2&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01025&quot;),
+  &quot;姓名&quot;=c(&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;,&quot;赵六&quot;))
+
+&quot;人员信息2&quot; &lt;- tibble(
+  &quot;号码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01025&quot;),
+  &quot;工资&quot;=c(4500,5200,7000,7800),
+  &quot;部门&quot;=c(&quot;管理部&quot;,&quot;技术部&quot;,&quot;财务部&quot;,&quot;财务部&quot;))</code></pre>
+<pre class="r"><code>&quot;合并表2&quot; &lt;- left_join(雇员2,人员信息2,by=  c(&quot;编码&quot;=&quot;号码&quot;))</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-5">Table 4: </span>合并表-2</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="even">
+<td align="left">01025</td>
+<td align="left">赵六</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
+<h2>2 两表存在不一致数据</h2>
+<p>下面两表最后一列数据不同</p>
+<pre class="r"><code>&quot;雇员3&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01025&quot;),
+  &quot;姓名&quot;=c(&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;,&quot;赵六&quot;))
+
+&quot;人员信息3&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01010&quot;),
+  &quot;工资&quot;=c(4500,5200,7000,7800),
+  &quot;部门&quot;=c(&quot;管理部&quot;,&quot;技术部&quot;,&quot;财务部&quot;,&quot;财务部&quot;))</code></pre>
+<p><code>left_jion()</code>函数：以第一张表为基础匹配所有数据，无匹配的显示为空值。</p>
+<pre class="r"><code>&quot;合并表3&quot; &lt;- left_join(雇员3,人员信息3,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-8">Table 5: </span>合并表-3</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="even">
+<td align="left">01025</td>
+<td align="left">赵六</td>
+<td align="center">NA</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<p><code>anti_jion()</code>函数：列出第一张表无匹配的数据，如表<a href="#tab:tab3">6</a>,表<a href="#tab:tab4">7</a></p>
+<pre class="r"><code>&quot;合并表4&quot; &lt;- anti_join(雇员3,人员信息3,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab3">Table 6: </span>合并表-4</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01025</td>
+<td align="left">赵六</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>&quot;合并表5&quot; &lt;- anti_join(人员信息3,雇员3,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:tab4">Table 7: </span>合并表-5</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01010</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+</tr>
+</tbody>
+</table>
+<p><code>inner_jion()</code>函数：只查找可匹配数据。</p>
+<pre class="r"><code>&quot;合并表6&quot; &lt;- inner_join(雇员3,人员信息3,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-12">Table 8: </span>合并表-6</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2>3 两表存在一对多情况</h2>
+<p>在EXCEL中vlookup只能匹配重复数据的第一个数据，数据多时难以核对重复数据。R语言中，可以匹配数据都会被匹配，这样容易筛选取舍。</p>
+<pre class="r"><code>&quot;雇员4&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01010&quot;,&quot;01029&quot;),
+  &quot;姓名&quot;=c(&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;,&quot;赵六&quot;,&quot;宝宝&quot;))
+
+&quot;人员信息4&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01010&quot;,&quot;01010&quot;,&quot;01010&quot;),
+  &quot;工资&quot;=c(4500,5200,7000,7800,12000,300),
+  &quot;部门&quot;=c(&quot;管理部&quot;,&quot;技术部&quot;,&quot;财务部&quot;,&quot;财务部&quot;,&quot;技术部&quot;,&quot;管理部&quot;))</code></pre>
+<p>下表中编号010010有三条重复数据，都被筛选匹配显示。</p>
+<pre class="r"><code>&quot;合并表7&quot; &lt;- left_join(雇员4,人员信息4,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-15">Table 9: </span>合并表-7</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="left">姓名</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="left">张三</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="left">李四</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="left">王五</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="even">
+<td align="left">01010</td>
+<td align="left">赵六</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+</tr>
+<tr class="odd">
+<td align="left">01010</td>
+<td align="left">赵六</td>
+<td align="center">12000</td>
+<td align="left">技术部</td>
+</tr>
+<tr class="even">
+<td align="left">01010</td>
+<td align="left">赵六</td>
+<td align="center">300</td>
+<td align="left">管理部</td>
+</tr>
+<tr class="odd">
+<td align="left">01029</td>
+<td align="left">宝宝</td>
+<td align="center">NA</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<p>两表数据多对多的情况如下：</p>
+<pre class="r"><code>&quot;雇员4&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01010&quot;,&quot;01029&quot;,&quot;01010&quot;),
+  &quot;姓名&quot;=c(&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;,&quot;赵六&quot;,&quot;宝宝&quot;,&quot;刘三&quot;))
+
+&quot;人员信息4&quot; &lt;- tibble(
+  &quot;编码&quot;=c(&quot;01001&quot;,&quot;01005&quot;,&quot;01009&quot;,&quot;01010&quot;,&quot;01010&quot;,&quot;01010&quot;),
+  &quot;工资&quot;=c(4500,5200,7000,7800,12000,300),
+  &quot;部门&quot;=c(&quot;管理部&quot;,&quot;技术部&quot;,&quot;财务部&quot;,&quot;财务部&quot;,&quot;技术部&quot;,&quot;管理部&quot;))</code></pre>
+<pre class="r"><code>&quot;合并表8&quot; &lt;- left_join(人员信息4,雇员4,by=&quot;编码&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-18">Table 10: </span>合并表-8</caption>
+<thead>
+<tr class="header">
+<th align="left">编码</th>
+<th align="center">工资</th>
+<th align="left">部门</th>
+<th align="left">姓名</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">01001</td>
+<td align="center">4500</td>
+<td align="left">管理部</td>
+<td align="left">张三</td>
+</tr>
+<tr class="even">
+<td align="left">01005</td>
+<td align="center">5200</td>
+<td align="left">技术部</td>
+<td align="left">李四</td>
+</tr>
+<tr class="odd">
+<td align="left">01009</td>
+<td align="center">7000</td>
+<td align="left">财务部</td>
+<td align="left">王五</td>
+</tr>
+<tr class="even">
+<td align="left">01010</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+<td align="left">赵六</td>
+</tr>
+<tr class="odd">
+<td align="left">01010</td>
+<td align="center">7800</td>
+<td align="left">财务部</td>
+<td align="left">刘三</td>
+</tr>
+<tr class="even">
+<td align="left">01010</td>
+<td align="center">12000</td>
+<td align="left">技术部</td>
+<td align="left">赵六</td>
+</tr>
+<tr class="odd">
+<td align="left">01010</td>
+<td align="center">12000</td>
+<td align="left">技术部</td>
+<td align="left">刘三</td>
+</tr>
+<tr class="even">
+<td align="left">01010</td>
+<td align="center">300</td>
+<td align="left">管理部</td>
+<td align="left">赵六</td>
+</tr>
+<tr class="odd">
+<td align="left">01010</td>
+<td align="center">300</td>
+<td align="left">管理部</td>
+<td align="left">刘三</td>
+</tr>
+</tbody>
+</table>
+<p>数据表所有匹配可能都显示。</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>readxl包也是tidyverse包中的一个包，不像其他EXCEL数据输入输出包，它没外部依赖软件，例如Java等。<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

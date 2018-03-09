@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>编程 on Xuejun Liu | 刘学军</title>
+    <link>/categories/%E7%BC%96%E7%A8%8B/</link>
+    <description>Recent content in 编程 on Xuejun Liu | 刘学军</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Feb 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/%E7%BC%96%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Notes：Converting data between wide and long format</title>
+      <link>/blog/2018/02/25/2018-02-25-notes-converting-data-between-wide-and-long-format/</link>
+      <pubDate>Sun, 25 Feb 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/2018/02/25/2018-02-25-notes-converting-data-between-wide-and-long-format/</guid>
+      <description>1.Problem You want to do convert data from a wide format to a long format. Many functions in R expect data to be in a long format rather than a wide format. Programs like SPSS, however, often use wide-formatted data. 2.Solution There are two sets of methods that are explained below: gather() and spread() from the tidyr package. This is a newer interface to the reshape2 package. melt() and dcast()</description>
+    </item>
+    
+    <item>
+      <title>EXCEL函数vlookup R语言实现方法</title>
+      <link>/blog/2018/02/18/2018-02-18-excel%E5%87%BD%E6%95%B0vlookupr%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95/</link>
+      <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/2018/02/18/2018-02-18-excel%E5%87%BD%E6%95%B0vlookupr%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95/</guid>
+      <description>vlookup是EXCEL中应用比较多的函数，可以连接两表数据，但在应用中存在明显缺陷： 1.在处理一对多数据时只能返回第一个值，在数据多时难</description>
+    </item>
+    
+  </channel>
+</rss>
